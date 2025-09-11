@@ -1,4 +1,12 @@
 
+diagnosis_map = {
+    'AD': 'AD',
+    'Control': 'Healthy',
+    'DLB': 'DLB',
+    'PD': 'PD'
+}
+
+
 import streamlit as st
 import joblib
 import pandas as pd
@@ -44,7 +52,7 @@ if csv_file is not None:
         input_df['Predicted Diagnosis'] = predicted_diagnoses
 
         st.subheader("Predictions for Uploaded Data:")
-        st.write(input_df[['Predicted Diagnosis']])
+        st.write(input_df[['Predicted Diagnosis']].replace(diagnosis_map))
 
         st.subheader("Original Data with Predicted Diagnoses:")
         st.write(input_df)
@@ -111,6 +119,11 @@ if st.button("Predict Diagnosis"):
 
     # Decode the prediction
     predicted_diagnosis = label_encoder.inverse_transform(prediction_encoded)
+
+    # Display the prediction
+    st.subheader("Predicted Diagnosis:")
+    st.info(diagnosis_map[predicted_diagnosis[0]])
+
 
     # Display the prediction
     st.subheader("Predicted Diagnosis:")

@@ -16,6 +16,63 @@ st.title("Diagnosis Prediction App")
 
 st.write("Enter the patient's characteristics to predict their diagnosis.")
 
+csv_file = st.file_uploader("Upload CSV file for batch prediction", type=["csv"])
+
+if csv_file is not None:
+    try:
+        input_df = pd.read_csv(csv_file)
+        st.write("Uploaded CSV file:")
+        st.write(input_df.head())
+
+        # Ensure columns match the training data
+        expected_columns = [
+            "Memory Recall (%)", "Gait Speed (m/s)", "Tremor Frequency (Hz)",
+            "Speech Rate (wpm)", "Reaction Time (ms)",
+            "Eye Movement Irregularities (saccades/s)", "Sleep Disturbance (scale 0-10)",
+            "Cognitive Test Score (MMSE)", "Blood Pressure (mmHg)", "Cholesterol (mg/dL)",
+            "Diabetes", "Severity", "Gender_Male"
+        ]
+        input_df = input_df[expected_columns]
+
+        # Make the prediction
+        predictions_encoded = model.predict(input_df)
+
+        # Decode the predictions
+        predicted_diagnoses = label_encoder.inverse_transform(predictions_encoded)
+
+        # Add predictions to the DataFrame
+        input_df['Predicted Diagnosis'] = predicted_diagnoses
+
+        st.subheader("Predictions for Uploaded Data:")
+        st.write(input_df[['Predicted Diagnosis']])
+
+        st.subheader("Original Data with Predicted Diagnoses:")
+        st.write(input_df)
+
+        # Add download button
+        @st.cache_data
+        def convert_df_to_csv(df):
+            # IMPORTANT: This is useful for Streamlit's download_button
+            return df.to_csv(index=False).encode('utf-8')
+
+        csv_for_download = convert_df_to_csv(input_df)
+
+        st.download_button(
+            label="Download Predictions as CSV",
+            data=csv_for_download,
+            file_name='predictions.csv',
+            mime='text/csv',
+        )
+
+
+
+
+        # Further processing and prediction will go here
+    except Exception as e:
+        st.error(f"Error reading CSV file: {e}")
+
+
+
 # Create input fields for each feature
 # You need to replace these with the actual feature names from your dataset
 # Example:
